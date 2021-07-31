@@ -11,7 +11,7 @@ class App extends Component {
     super(props)
     this.state = {
       account: '0x0',
-      bscDidRegistry: {},
+      hecoDidRegistry: {},
       did: 'No DID yet',
       jwt: '',
       ethrDid: undefined,
@@ -33,10 +33,10 @@ class App extends Component {
     const networkId = await web3.eth.net.getId()
 
     // Load HecoDidRegistry
-    const bscDidRegistryData = HecoDidRegistry.networks[networkId]
-    if(bscDidRegistryData) {
-      const bscDidRegistry = new web3.eth.Contract(HecoDidRegistry.abi, bscDidRegistryData.address)
-      this.setState({ bscDidRegistry })
+    const hecoDidRegistryData = HecoDidRegistry.networks[networkId]
+    if(hecoDidRegistryData) {
+      const hecoDidRegistry = new web3.eth.Contract(HecoDidRegistry.abi, hecoDidRegistryData.address)
+      this.setState({ hecoDidRegistry })
     } else {
       window.alert('HecoDidRegistry contract not deployed to detected network.')
     }
@@ -61,7 +61,7 @@ class App extends Component {
     this.setState({ loading: true })
     if(!this.state.ethrDid) window.alert('Please first create a DID')
     const jwt = await this.state.ethrDid.signJWT({ claims: claim });
-    this.state.bscDidRegistry.methods.changeOwner(this.state.account, this.state.account).send({ from: this.state.account }).on('transactionHash', (hash) => {
+    this.state.hecoDidRegistry.methods.changeOwner(this.state.account, this.state.account).send({ from: this.state.account }).on('transactionHash', (hash) => {
       this.setState({ loading: false, jwt })
     })
   }
@@ -69,7 +69,7 @@ class App extends Component {
   createDid = () => {
     const keypair = EthrDID.createKeyPair();
     const ethrDid = new EthrDID({
-      address: this.state.bscDidRegistry._address,
+      address: keypair.address,
       privateKey: keypair.privateKey,
       provider: window.web3.currentProvider,
     });
